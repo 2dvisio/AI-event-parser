@@ -160,10 +160,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ authUrl });
   });
 
+  // Debug endpoint to check OAuth configuration
+  app.get("/api/auth/debug", (req, res) => {
+    const redirectUri = process.env.GOOGLE_REDIRECT_URI || 
+      (process.env.REPLIT_DEV_DOMAIN ? 
+        `https://${process.env.REPLIT_DEV_DOMAIN}/api/auth/google/callback` : 
+        "http://localhost:5000/api/auth/google/callback");
+    
+    res.json({
+      clientId: process.env.GOOGLE_CLIENT_ID ? "✓ Configured" : "✗ Missing",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET ? "✓ Configured" : "✗ Missing",
+      redirectUri: redirectUri,
+      replitDomain: process.env.REPLIT_DEV_DOMAIN,
+      instructions: [
+        "1. Go to https://console.cloud.google.com/apis/credentials",
+        "2. Find your OAuth 2.0 Client and click Edit",
+        "3. Add this redirect URI to 'Authorized redirect URIs':",
+        redirectUri,
+        "4. Save changes and try connecting again"
+      ]
+    });
+  });
+
   app.get("/api/auth/google/callback", async (req, res) => {
     try {
+      console.log("Google OAuth callback received:", {
+        query: req.query,
+        url: req.url,
+        headers: req.headers
+      });
+      
       const { code } = req.query;
       if (!code) {
+        console.log("No authorization code in query params");
         return res.status(400).json({ message: "No authorization code provided" });
       }
 
