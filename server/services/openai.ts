@@ -62,12 +62,19 @@ export async function extractEventsFromText(text: string): Promise<ExtractedEven
           For each event, provide:
           - title: Clear, descriptive title
           - description: Brief description with relevant details
-          - startDate: ISO 8601 format (YYYY-MM-DDTHH:MM:SS)
+          - startDate: 
+            * If specific time is mentioned: ISO 8601 format (YYYY-MM-DDTHH:MM:SS)
+            * If only date is mentioned: ISO 8601 date format (YYYY-MM-DD)
+            * This determines if event will be all-day or timed
           - endDate: ISO 8601 format if duration is specified, otherwise null
           - location: If mentioned in the text
           - confidence: Score from 0-100 indicating how confident you are this is a real event
           
-          Only include events with confidence > 60. If no clear dates are found, try to infer from context.
+          IMPORTANT: 
+          - Only include events with confidence > 60
+          - If no specific time is mentioned (like "9:00 AM", "2:30 PM"), use date-only format (YYYY-MM-DD)
+          - If specific time IS mentioned, use full datetime format (YYYY-MM-DDTHH:MM:SS)
+          - This distinction is crucial for proper calendar event creation
           
           Respond with JSON in this format: { "events": [array of events] }`
         },

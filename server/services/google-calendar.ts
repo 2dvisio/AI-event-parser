@@ -74,21 +74,48 @@ export class GoogleCalendarService {
       const calendar = google.calendar({ version: 'v3', auth: this.oauth2Client });
 
       const startDateTime = new Date(event.startDate);
-      const endDateTime = event.endDate ? new Date(event.endDate) : new Date(startDateTime.getTime() + 60 * 60 * 1000); // Default 1 hour duration
-
-      const calendarEvent = {
+      
+      // Check if the startDate includes specific time (has hours/minutes)
+      const hasSpecificTime = event.startDate.includes('T') || 
+                             event.startDate.includes(':') || 
+                             /\d{1,2}:\d{2}/.test(event.startDate);
+      
+      let calendarEvent: any = {
         summary: event.title,
         description: event.description,
         location: event.location,
-        start: {
+        // Add reminders: 1 day and 2 days before
+        reminders: {
+          useDefault: false,
+          overrides: [
+            { method: 'email', minutes: 24 * 60 }, // 1 day before
+            { method: 'email', minutes: 48 * 60 }, // 2 days before
+            { method: 'popup', minutes: 24 * 60 }, // 1 day before (popup)
+          ]
+        }
+      };
+
+      if (hasSpecificTime) {
+        // Timed event
+        const endDateTime = event.endDate ? new Date(event.endDate) : new Date(startDateTime.getTime() + 60 * 60 * 1000);
+        calendarEvent.start = {
           dateTime: startDateTime.toISOString(),
-          timeZone: 'America/New_York', // Default timezone, should be configurable
-        },
-        end: {
+          timeZone: 'America/New_York',
+        };
+        calendarEvent.end = {
           dateTime: endDateTime.toISOString(),
           timeZone: 'America/New_York',
-        },
-      };
+        };
+      } else {
+        // All-day event (no specific time extracted)
+        const startDate = startDateTime.toISOString().split('T')[0]; // Get YYYY-MM-DD format
+        const endDate = event.endDate ? 
+          new Date(event.endDate).toISOString().split('T')[0] : 
+          new Date(startDateTime.getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]; // Next day
+        
+        calendarEvent.start = { date: startDate };
+        calendarEvent.end = { date: endDate };
+      }
 
       const response = await calendar.events.insert({
         calendarId: calendarId || 'primary',
