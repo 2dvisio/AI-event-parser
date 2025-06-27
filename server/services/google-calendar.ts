@@ -34,13 +34,17 @@ export class GoogleCalendarService {
 
   async getTokens(code: string): Promise<{ accessToken: string; refreshToken: string }> {
     try {
-      const { tokens } = await this.oauth2Client.getAccessToken(code);
+      const { tokens } = await this.oauth2Client.getToken(code);
+      if (!tokens.access_token) {
+        throw new Error('No access token received');
+      }
       return {
-        accessToken: tokens.access_token!,
-        refreshToken: tokens.refresh_token!
+        accessToken: tokens.access_token,
+        refreshToken: tokens.refresh_token || ''
       };
     } catch (error) {
-      throw new Error("Failed to get tokens: " + error.message);
+      console.error('OAuth token exchange error:', error);
+      throw new Error("Failed to get tokens: " + (error.message || 'Unknown error'));
     }
   }
 

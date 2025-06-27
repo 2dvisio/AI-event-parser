@@ -190,10 +190,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         headers: req.headers
       });
       
-      const { code } = req.query;
+      const { code, error } = req.query;
+      
+      // Handle OAuth errors (user denied access, etc.)
+      if (error) {
+        console.log("OAuth error:", error);
+        return res.send(`
+          <html>
+            <body>
+              <script>window.close();</script>
+              <p>Authentication cancelled. You can close this window.</p>
+            </body>
+          </html>
+        `);
+      }
+      
       if (!code) {
         console.log("No authorization code in query params");
-        return res.status(400).json({ message: "No authorization code provided" });
+        return res.send(`
+          <html>
+            <body>
+              <script>window.close();</script>
+              <p>No authorization code received. You can close this window.</p>
+            </body>
+          </html>
+        `);
       }
 
       const tokens = await googleCalendarService.getTokens(code as string);
@@ -209,11 +230,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         metadata: { email: userInfo.email }
       });
 
-      // Redirect to frontend with success
-      res.redirect('/?connected=true');
+      console.log("Google OAuth successful for:", userInfo.email);
+      
+      // Close the popup and refresh parent window
+      res.send(`
+        <html>
+          <body>
+            <script>
+              window.opener.location.reload();
+              window.close();
+            </script>
+            <p>Authentication successful! You can close this window.</p>
+          </body>
+        </html>
+      `);
     } catch (error) {
       console.error("OAuth callback error:", error);
-      res.redirect('/?error=auth_failed');
+      res.send(`
+        <html>
+          <body>
+            <script>window.close();</script>
+            <p>Authentication failed. You can close this window.</p>
+          </body>
+        </html>
+      `);
     }
   });
 
