@@ -15,7 +15,29 @@ export function CalendarConnectionStatus() {
     try {
       const response = await fetch('/api/auth/google');
       const data = await response.json();
-      window.location.href = data.authUrl;
+      
+      // Open OAuth in a new window to avoid iframe restrictions
+      const popup = window.open(
+        data.authUrl,
+        'google-oauth',
+        'width=500,height=600,scrollbars=yes,resizable=yes'
+      );
+      
+      if (!popup) {
+        // Fallback if popup is blocked
+        window.location.href = data.authUrl;
+        return;
+      }
+
+      // Listen for popup completion
+      const checkClosed = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkClosed);
+          // Refresh the page to check if OAuth was successful
+          window.location.reload();
+        }
+      }, 1000);
+      
     } catch (error) {
       console.error('Failed to initiate Google OAuth:', error);
     }
