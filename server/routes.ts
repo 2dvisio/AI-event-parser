@@ -210,6 +210,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get current user
+  app.get("/api/user", async (req, res) => {
+    try {
+      const userId = 1; // TODO: Get from session/auth
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json({ user });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
