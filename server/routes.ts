@@ -241,6 +241,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               window.close();
             </script>
             <p>Authentication successful! You can close this window.</p>
+            <div style="margin-top: 20px; padding: 10px; background: #f0f8ff; border-radius: 5px;">
+              <strong>Next Step:</strong> Enable Google Calendar API<br>
+              <a href="https://console.developers.google.com/apis/api/calendar-json.googleapis.com/overview?project=792843543972" target="_blank">
+                Click here to enable Calendar API
+              </a>
+            </div>
           </body>
         </html>
       `);
