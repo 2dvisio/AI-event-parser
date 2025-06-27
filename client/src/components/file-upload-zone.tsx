@@ -95,6 +95,9 @@ export function FileUploadZone() {
   });
 
   const getFileIcon = (mimeType: string) => {
+    if (!mimeType) {
+      return <FileText className="text-gray-600 text-sm" />;
+    }
     if (mimeType.startsWith('image/')) {
       return <Image className="text-blue-600 text-sm" />;
     } else if (mimeType === 'application/pdf') {
