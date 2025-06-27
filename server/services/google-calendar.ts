@@ -3,7 +3,10 @@ import { OAuth2Client } from 'google-auth-library';
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID_ENV_VAR || "default_client_id";
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || process.env.GOOGLE_CLIENT_SECRET_ENV_VAR || "default_client_secret";
-const REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI || "http://localhost:5000/api/auth/google/callback";
+const REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI || 
+  (process.env.REPLIT_DEV_DOMAIN ? 
+    `https://${process.env.REPLIT_DEV_DOMAIN}/api/auth/google/callback` : 
+    "http://localhost:5000/api/auth/google/callback");
 
 export class GoogleCalendarService {
   private oauth2Client: OAuth2Client;
