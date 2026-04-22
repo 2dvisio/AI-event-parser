@@ -1,5 +1,7 @@
 # SchoolSync AI
 
+![SchoolSync AI Banner](attached_assets/schoolsync-banner.png)
+
 SchoolSync AI is a full-stack web application that uses AI to automatically extract events from school communications (images, screenshots, PDFs, text files) and add them to your Google Calendar.
 
 ## Features
